@@ -19,7 +19,7 @@ public interface RecipeService {
 
 	FavoriteRecipes updateFavRecipe(int favId, UpdateRecipeRequestDTO updateRequest) throws Exception;
 
-	FavoriteRecipes deleteRecipe(int favId);
+	Boolean deleteRecipe(int favId);
 
 	List<FavoriteRecipeResonseDTO> searching(FavoriteRecipeSearchRequestDTO request);
 

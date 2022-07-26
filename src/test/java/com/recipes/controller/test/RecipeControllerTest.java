@@ -28,12 +28,13 @@ import com.recipes.bean.FavoriteRecipes;
 import com.recipes.bean.Recipes;
 import com.recipes.bean.User;
 import com.recipes.dto.FavoriteRecipeResonseDTO;
+import com.recipes.dto.FavoriteRecipeSearchRequestDTO;
 import com.recipes.dto.RecipeRequestDTO;
 import com.recipes.dto.UpdateRecipeRequestDTO;
 import com.recipes.services.RecipeService;
 import com.recipes.test.BaseTest;
 
-public class RecipeControllerTest extends BaseTest{
+class RecipeControllerTest extends BaseTest{
 
 	@Autowired
     MockMvc mockMvc;
@@ -43,15 +44,12 @@ public class RecipeControllerTest extends BaseTest{
 	
 	@MockBean
 	private RecipeService recipeService;
-	
-	
-	@Test
-	public void contextLoads() {
-	}
+
 	
 	@Test
 	void testGetAllRecipes() throws Exception{
 		
+		// set expectation
 		Recipes record1 = new Recipes();
 		record1.setRecipeName("Food 1");
 		record1.setRecipeId(1000);
@@ -68,6 +66,7 @@ public class RecipeControllerTest extends BaseTest{
 		
 		List<Recipes> recordsList = new ArrayList<>(Arrays.asList(record1, record2));
 		
+		//perform HTTP request and set the expectations with MockMVC
 		when(recipeService.getAllRecipes()).thenReturn(recordsList);
 			
 		this.mockMvc.perform(get("/api/recipes/recipes"))
@@ -80,7 +79,7 @@ public class RecipeControllerTest extends BaseTest{
 	
 	@Test
 	void testGetAllFavRecipes() throws Exception{
-		
+		// set expectation
 		FavoriteRecipeResonseDTO mockResponse1 = new FavoriteRecipeResonseDTO();
 		mockResponse1.setFavId(3);
 		mockResponse1.setRecipeId(1000);
@@ -109,10 +108,11 @@ public class RecipeControllerTest extends BaseTest{
 		
 		List<FavoriteRecipeResonseDTO> recordsList = new ArrayList<>(Arrays.asList(mockResponse1, mockResponse2,mockResponse3));
 		
+		//perform HTTP request and set the expectations with MockMVC
 		when(recipeService.getAllFavoriteRecipeByUser(userId)).thenReturn(recordsList);
 		
 		this.mockMvc.perform(get("/api/recipes/favrecipes?userId={id}",userId))
-		                     // .andDo(print())
+		                      .andDo(print())
 		                      .andExpect(status().isOk())
 		                      .andExpect(jsonPath("$.size()", is(recordsList.size())))
 		                      .andExpect(jsonPath("$[1].rating", is(4)))
@@ -122,14 +122,14 @@ public class RecipeControllerTest extends BaseTest{
 
 	@Test
 	void testDeleteRecipe() throws Exception{
-		
+		// set expectation
 		int favId = 1;
 		FavoriteRecipes favRecipe = new FavoriteRecipes();
 		favRecipe.setFavId(favId);
 		favRecipe.setRating(5);
 		favRecipe.setServings(2);
-		
-		when(recipeService.deleteRecipe(favId)).thenReturn(favRecipe);
+		//perform HTTP request and set the expectations with MockMVC
+		when(recipeService.deleteRecipe(favId)).thenReturn(true);
 		
 		this.mockMvc.perform(delete("/api/recipes/deleterecipe/{id}",favRecipe.getFavId()))
 		                    .andExpect(status().isNotFound());
@@ -138,17 +138,17 @@ public class RecipeControllerTest extends BaseTest{
 	
 	@Test
 	void testAddRecipe() throws Exception{
-		
+		// set expectation
 		RecipeRequestDTO requestMock = new RecipeRequestDTO();
-		requestMock.setRecipe_id(1);
+		requestMock.setRecipeId(1);
 		requestMock.setServings(6);
-		requestMock.setUser_id(111);
+		requestMock.setUserId(111);
 		
 		FavoriteRecipes record1 = new FavoriteRecipes();
 		record1.setFavId(1);
 		record1.setRating(4);
 		record1.setServings(6);
-		
+		//perform HTTP request and set the expectations with MockMVC
 		String inputInJson = this.mapToJson(requestMock);
 		
 		String URI = "/api/recipes/addrecipe";
@@ -171,12 +171,12 @@ public class RecipeControllerTest extends BaseTest{
 	
 	@Test
     void testUpdateRecipe() throws Exception {
-		
+		// set expectation
 		int favId =1;
 		
 		UpdateRecipeRequestDTO request = new UpdateRecipeRequestDTO();
 		request.setRating(6);
-		request.setRecipe_id(1);
+		request.setRecipeId(1);
 		request.setServings(3);
 		
 		User user = new User();
@@ -200,7 +200,7 @@ public class RecipeControllerTest extends BaseTest{
 		String inputInJson = this.mapToJson(favRecipe);
 		
 		String URI = "/api/recipes/updaterecipe/{id}";
-		
+		//perform HTTP request and set the expectations with MockMVC
 		 when(recipeService.updateFavRecipe(favId,request)).thenReturn(favRecipe);		 
 		 
 		 mockMvc.perform(put(URI, favId)
@@ -209,6 +209,61 @@ public class RecipeControllerTest extends BaseTest{
 		            .andExpect(status().isOk()).andDo(print()).andReturn();
 
     }
+	
+	@Test
+	void testSearching() throws Exception {
+		// set expectation		
+		FavoriteRecipeSearchRequestDTO request = new FavoriteRecipeSearchRequestDTO();
+		request.setDishType("non-veg");
+		request.setIncludeIngredient(Arrays.asList("pepper","tomato"));
+		request.setExcludeIngredient(Arrays.asList("salt"));
+		request.setInstruction("cooked");
+		request.setServings(1);
+		request.setUserId(112);
+		
+		FavoriteRecipeResonseDTO mockResponse = new FavoriteRecipeResonseDTO();
+		mockResponse.setFavId(3);
+		mockResponse.setRecipeId(1000);
+		mockResponse.setRating(5);
+		mockResponse.setServings(2);
+		mockResponse.setDishType("NON-VEG");
+		mockResponse.setInstruction("FULLY COOKED");
+		
+		FavoriteRecipeResonseDTO mockResponse2 = new FavoriteRecipeResonseDTO();
+		mockResponse2.setFavId(3);
+		mockResponse2.setRecipeId(1000);
+		mockResponse2.setRating(4);
+		mockResponse2.setServings(1);
+		mockResponse2.setDishType("NON-VEG");
+		mockResponse2.setInstruction("FULLY COOKED");
+		
+		
+		List<FavoriteRecipeResonseDTO> recordsList = new ArrayList<>(Arrays.asList(mockResponse,mockResponse2));
+		//perform HTTP request and set the expectations with MockMVC
+        when(recipeService.searching(request)).thenReturn(recordsList);
+        
+        String URL = "/api/recipes/searching?dishType=non-veg&excludeIngredients=salt&includeIngredients=pepper&includeIngredients=tomato&instructions=cooked&servings=1&userId=112";
+		
+       when(recipeService.searching(request)).thenReturn(recordsList);
+		
+		this.mockMvc.perform(get(URL).contentType(MediaType.APPLICATION_JSON))
+		                      .andDo(print())
+		                      .andExpect(status().isOk())
+		                      .andExpect(jsonPath("$.size()", is(recordsList.size())))
+		                      .andExpect(jsonPath("$[1].rating", is(4)))
+		                      .andExpect(jsonPath("$[1].dishType", is("NON-VEG")));
+        /*
+        
+        String inputInJson = this.mapToJson(mockResponse);
+        this.mockMvc.perform(get(URL))
+				//.accept(MediaType.APPLICATION_JSON).content(inputInJson))
+				//.contentType(MediaType.APPLICATION_JSON))
+		                      .andExpect(status().isOk())
+		                      .andDo(print())
+		                      .andExpect(jsonPath("$.size()", is(recordsList.size())))
+		                      .andExpect(jsonPath("$[0].favId", is(3)))
+		                      .andExpect(jsonPath("$[0].dishType", is("NON-VEG")));  */
+	}
     
 	/**
 	 * Maps an Object into a JSON String. Uses a Jackson ObjectMapper.

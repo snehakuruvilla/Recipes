@@ -5,8 +5,8 @@ import lombok.Data;
 @Data
 public class UpdateRecipeRequestDTO {
 
-	private int recipe_id;
-	private int user_id;
+	private int recipeId;
+	private int userId;
 	private int rating;
 	private int servings;
 

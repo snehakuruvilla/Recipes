@@ -2,7 +2,6 @@
 package com.recipes.services;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.recipes.bean.FavoriteRecipes;
+import com.recipes.bean.Ingredients;
 import com.recipes.bean.Recipes;
 import com.recipes.bean.User;
 import com.recipes.dto.FavoriteRecipeResonseDTO;
@@ -63,24 +63,6 @@ public class RecipeServiceImpl implements RecipeService {
 		return recipeRepository.findAll();
 	}
 	
-	/**
-	 * This method is used to convert entity to ResponseDTO
-	 */
-	private FavoriteRecipeResonseDTO convertEntityToDto(FavoriteRecipes favRecipes) {
-		log.info("Entering the convertEntityToDto of RecipeServiceImpl class!!");
-		FavoriteRecipeResonseDTO recipeResonseDTO = new FavoriteRecipeResonseDTO();
-		recipeResonseDTO.setFavId(favRecipes.getFavId());
-		recipeResonseDTO.setRecipeId(favRecipes.getRecipe().getRecipeId());
-		recipeResonseDTO.setRecipeName(favRecipes.getRecipe().getRecipeName());
-		recipeResonseDTO.setRating(favRecipes.getRating());
-		recipeResonseDTO.setDishType(favRecipes.getRecipe().getDishType());
-		recipeResonseDTO.setServings(favRecipes.getServings());
-		recipeResonseDTO.setInstruction(favRecipes.getRecipe().getInstructions());
-		recipeResonseDTO.setIngredients(
-				recipeRepository.findAll().stream().filter(r -> r.getRecipeId() == favRecipes.getRecipe().getRecipeId())
-						.flatMap(t -> t.getIngredients().stream()).distinct().collect(Collectors.toList()));
-		return recipeResonseDTO;
-	}
 
 	/**
 	 * This method is used to add a favorite recipe
@@ -90,11 +72,11 @@ public class RecipeServiceImpl implements RecipeService {
 		
 		log.info("Entering the addFavRecipe of RecipeServiceImpl class!!");
 		
-		User user = userRepository.findById(favRecipeDto.getUser_id())
-				.orElseThrow(() -> new ResourceNotFoundException("User not found with id :" + favRecipeDto.getUser_id()));
+		User user = userRepository.findById(favRecipeDto.getUserId())
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with id :" + favRecipeDto.getUserId()));
 
-		Recipes recipes = recipeRepository.findById(favRecipeDto.getRecipe_id())
-				.orElseThrow(() -> new ResourceNotFoundException("Recipes not found with id :" + favRecipeDto.getRecipe_id()));
+		Recipes recipes = recipeRepository.findById(favRecipeDto.getRecipeId())
+				.orElseThrow(() -> new ResourceNotFoundException("Recipes not found with id :" + favRecipeDto.getRecipeId()));
 
 		FavoriteRecipes favoriteRecipe = new FavoriteRecipes();
 		favoriteRecipe.setRecipe(recipes);
@@ -116,11 +98,11 @@ public class RecipeServiceImpl implements RecipeService {
 		FavoriteRecipes favoriteRecipes = favoriteRecipeRepository.findById(favId)
 				.orElseThrow(() -> new ResourceNotFoundException("FavoriteRecipes not found with id :" + favId));
 
-		User user = userRepository.findById(updateRequest.getUser_id())
-				.orElseThrow(() -> new ResourceNotFoundException("User not found with id :" + updateRequest.getUser_id()));
+		User user = userRepository.findById(updateRequest.getUserId())
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with id :" + updateRequest.getUserId()));
 
-		Recipes recipes = recipeRepository.findById(updateRequest.getRecipe_id())
-				.orElseThrow(() -> new ResourceNotFoundException("Recipes not found with id :" + updateRequest.getRecipe_id()));
+		Recipes recipes = recipeRepository.findById(updateRequest.getRecipeId())
+				.orElseThrow(() -> new ResourceNotFoundException("Recipes not found with id :" + updateRequest.getRecipeId()));
 
 		favoriteRecipes.setRecipe(recipes);
 		favoriteRecipes.setUser(user);
@@ -134,10 +116,10 @@ public class RecipeServiceImpl implements RecipeService {
 	 * This method is used to delete a favorite recipe from list
 	 */
 	@Override
-	public FavoriteRecipes deleteRecipe(int favId) {
+	public Boolean deleteRecipe(int favId) {
 		log.info("Entering the deleteRecipe of RecipeServiceImpl class!!");
 		favoriteRecipeRepository.deleteById(favId);
-		return favoriteRecipeRepository.getById(favId);
+		return true;
 		 
 	}
 	
@@ -149,15 +131,42 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public List<FavoriteRecipeResonseDTO> searching(FavoriteRecipeSearchRequestDTO favoriteRecipeSearchRequestDTO) {
 		log.info("Entering the searching of RecipeServiceImpl class!!");
+		
 		return favoriteRecipeRepository.findAll().stream()
-				.filter(f -> f.getUser().getUserId() == favoriteRecipeSearchRequestDTO.getUserId())
+				.filter(t -> t.getUser().getUserId() == favoriteRecipeSearchRequestDTO.getUserId())
 				.filter(t -> t.getServings() == favoriteRecipeSearchRequestDTO.getServings())
-					.filter(t -> t.getRecipe().getDishType().equals(favoriteRecipeSearchRequestDTO.getDishType()))
-					.filter(t -> t.getRecipe().getInstructions().equalsIgnoreCase(favoriteRecipeSearchRequestDTO.getInstruction()))
-					/*.filter(t -> t.getRecipe().getIngredients().contains(favoriteRecipeSearchRequestDTO.getIncludeIngredient()))
-					.filter(t -> !t.getRecipe().getIngredients()
-						.contains(favoriteRecipeSearchRequestDTO.getExcludeIngredient())) */
+					.filter(t -> t.getRecipe().getDishType().equalsIgnoreCase(favoriteRecipeSearchRequestDTO.getDishType()))
+					.filter(t -> t.getRecipe().getInstructions().toLowerCase().contains(favoriteRecipeSearchRequestDTO.getInstruction().toLowerCase()))
+					.filter(t -> t.getRecipe().getIngredients().stream().anyMatch(i-> 
+					favoriteRecipeSearchRequestDTO.getIncludeIngredient().stream()
+					.anyMatch(b-> i.getIngredientsName().equalsIgnoreCase(b))))	
+					.filter(t -> t.getRecipe().getIngredients().stream().anyMatch(i-> 
+					favoriteRecipeSearchRequestDTO.getExcludeIngredient().stream()
+					.anyMatch(b-> !i.getIngredientsName().equalsIgnoreCase(b))))	
 				.map(this::convertEntityToDto).collect(Collectors.toList());
+
+	}
+	
+	/**
+	 * This method is used to convert entity to ResponseDTO
+	 */
+	private FavoriteRecipeResonseDTO convertEntityToDto(FavoriteRecipes favRecipes) {
+		log.info("Entering the convertEntityToDto of RecipeServiceImpl class!!");
+		FavoriteRecipeResonseDTO recipeResonseDTO = new FavoriteRecipeResonseDTO();
+		recipeResonseDTO.setFavId(favRecipes.getFavId());
+		recipeResonseDTO.setRecipeId(favRecipes.getRecipe().getRecipeId());
+		recipeResonseDTO.setRecipeName(favRecipes.getRecipe().getRecipeName());
+		recipeResonseDTO.setRating(favRecipes.getRating());
+		recipeResonseDTO.setDishType(favRecipes.getRecipe().getDishType());
+		recipeResonseDTO.setServings(favRecipes.getServings());
+		recipeResonseDTO.setInstruction(favRecipes.getRecipe().getInstructions());
+		recipeResonseDTO.setIngredients(this.getIngredients(favRecipes.getRecipe().getRecipeId()));
+		return recipeResonseDTO;
+	}
+	
+	private List<Ingredients> getIngredients(int recipeId){
+		return recipeRepository.findAll().stream().filter(r -> r.getRecipeId() == recipeId)
+				.flatMap(t -> t.getIngredients().stream()).distinct().collect(Collectors.toList());
 	}
 
 }

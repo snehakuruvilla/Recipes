@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,7 +57,7 @@ public class RecipeController {
 	 * @return List<recipes>
 	 */
 	@GetMapping(value="/recipes")
-	public ResponseEntity<List<Recipes>> getAllRecipes() throws Exception{
+	public ResponseEntity<List<Recipes>> getAllRecipes(){
 		return new ResponseEntity<>(recipeService.getAllRecipes(),HttpStatus.OK);		
 	}
 	
@@ -91,14 +90,14 @@ public class RecipeController {
 	 * @return boolean
 	 */
 	@DeleteMapping("/deleterecipe/{id}")
-	public ResponseEntity<FavoriteRecipes> deleteRecipe(@PathVariable(name="id") int favId){
+	public ResponseEntity<Boolean> deleteRecipe(@PathVariable(name="id") int favId){
 		return new ResponseEntity<>(recipeService.deleteRecipe(favId),HttpStatus.NOT_FOUND);
 	}
 	
 	@GetMapping("/searching")
 	public ResponseEntity<List<FavoriteRecipeResonseDTO>> getSearching(@RequestParam(name="userId") int userId, @RequestParam(name="servings") int servings, 
 			@RequestParam(name="dishType") String dishType, @RequestParam(name="instructions") String instructions, 
-			@RequestParam(name="includeIngredients") String includeIngredients, @RequestParam(name="excludeIngredients") String excludeIngredients){
+			@RequestParam(name="includeIngredients") List<String> includeIngredients, @RequestParam(name="excludeIngredients") List<String> excludeIngredients){
 		FavoriteRecipeSearchRequestDTO request = new FavoriteRecipeSearchRequestDTO();
 		request.setDishType(dishType);
 		request.setExcludeIngredient(excludeIngredients);
