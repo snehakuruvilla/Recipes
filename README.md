@@ -63,3 +63,33 @@ JUnit test are available. Code quality checked using Sonar.
 ---> along with update and delete button on each record -- which invokes the DELETE and PUT method
 ---> Below there is an add button and search button which can invoke the apis GET /api/recipes/recipes and GET ​/api​/recipes​/searching
 ---> On the list of recipes a new add to favorite button is there, on click calls the api POST /api/recipes/addrecipe which adds the record to FavoriteRecipes.
+
+####Example Api Request:
+GET /api/recipes/recipes - To get all recipes.
+--> http://localhost:8080/api/recipes/recipes
+
+GET /api/recipes/favrecipes - To get the favorite recipes of user.
+--> http://localhost:8080/api/recipes/favrecipes?userId=112
+
+GET ​/api​/recipes​/searching - To get the filter search result.
+--> http://localhost:8080/api/recipes/searching?dishType=non-veg&excludeIngredients=salt&includeIngredients=pepper&includeIngredients=tomato&instructions=cooked&servings=1&userId=112
+
+POST /api/recipes/addrecipe - add a new favorite recipe for user.
+--> http://localhost:8080/api/recipes/addrecipe
+{
+  "recipeId": 1003,
+  "servings": 3,
+  "userId": 115
+}
+
+PUT ​/api​/recipes​/updaterecipe​/{id} - Update the favorite recipe details.
+--> http://localhost:8080/api/recipes/updaterecipe/7
+{
+    "recipeId": 1000,
+    "rating": 10,
+    "servings": 1,
+    "userId": 112
+}
+
+DELETE /api/recipes/deleterecipe/{id} - Delete a favorite recipe for a user.
+-->http://localhost:8080/api/recipes/deleterecipe/7
