@@ -7,6 +7,10 @@ import com.recipes.bean.Recipes;
 
 import lombok.Data;
 
+/**
+ * @author SK
+ *
+ */
 @Data
 public class RecipeResonseDTO {
 

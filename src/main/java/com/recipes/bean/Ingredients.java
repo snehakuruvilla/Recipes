@@ -16,6 +16,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
+/**
+ * @author SK
+ *
+ */
 @Entity
 @Table(name = "INGREDIENTS")
 @Data

@@ -2,6 +2,10 @@ package com.recipes.dto;
 
 import lombok.Data;
 
+/**
+ * @author SK
+ *
+ */
 @Data
 public class UpdateRecipeRequestDTO {
 

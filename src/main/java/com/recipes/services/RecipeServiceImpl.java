@@ -24,7 +24,7 @@ import com.recipes.repo.RecipeRepository;
 import com.recipes.repo.UserRepository;
 
 /**
- * Service class to deal with recipes
+ * Service class for recipes functional implementions
  *
  */
 @Service
@@ -43,9 +43,15 @@ public class RecipeServiceImpl implements RecipeService {
 
 	@Autowired
 	IngredientsRepository ingredientsRepository;
+	
 
 	/**
-	 * This method is used to get all the faviorite recipes per user
+	 * This method is used to get all the faviorite recipes per user.
+	 * 
+	 * The methods gets all the favorite recipe list from repository using findAll() method
+	 * and filter out the favorite recipes for the given userId 
+	 * Saves the list in the required formate in ResponseDTO
+	 * 
 	 */
 	@Override
 	public List<FavoriteRecipeResonseDTO> getAllFavoriteRecipeByUser(int userId) {
@@ -54,8 +60,11 @@ public class RecipeServiceImpl implements RecipeService {
 				.map(this::convertEntityToDto).collect(Collectors.toList());
 	}
 
+	
 	/**
 	 * This method is used to get all the recipes
+	 * 
+	 * The method gets all the recipe list from the repository using the findAll() method.
 	 */
 	@Override
 	public List<Recipes> getAllRecipes() {
@@ -66,6 +75,10 @@ public class RecipeServiceImpl implements RecipeService {
 
 	/**
 	 * This method is used to add a favorite recipe
+	 * 
+	 * This method Get the request from the UI and find the user and recipe object using the given respective ids
+	 * and save the favorite recipe in to the repository
+	 * 
 	 */
 	@Override
 	public FavoriteRecipes addFavRecipe(RecipeRequestDTO favRecipeDto) throws Exception {
@@ -86,9 +99,14 @@ public class RecipeServiceImpl implements RecipeService {
 		return favoriteRecipeRepository.save(favoriteRecipe);
 		
 	}
+	
+	
 
 	/**
 	 * This method is used to update recipe
+	 * This method finds the record with Id using findById and updates the requested value in to the repository.
+	 * 
+	 * 
 	 */
 	@Override
 	public FavoriteRecipes updateFavRecipe(int favId, UpdateRecipeRequestDTO updateRequest) throws Exception {
@@ -114,6 +132,8 @@ public class RecipeServiceImpl implements RecipeService {
 	
 	/**
 	 * This method is used to delete a favorite recipe from list
+	 * 
+	 * Deletes the favoriteRecipe from the table using deleteById
 	 */
 	@Override
 	public Boolean deleteRecipe(int favId) {
@@ -126,6 +146,9 @@ public class RecipeServiceImpl implements RecipeService {
 	
 	/**
 	 * This method is used to get the filter search on dishType, servings, ingredients, instructions for User
+	 * 
+	 * Gets all the list of favoriteRecipe using findAll() and filter the result with the request.
+	 * The result list is converted into the required format and passed to controller class.
 	 *
 	 */
 	@Override
@@ -147,8 +170,11 @@ public class RecipeServiceImpl implements RecipeService {
 
 	}
 	
+	
 	/**
 	 * This method is used to convert entity to ResponseDTO
+	 * 
+	 * Mathod used to format the result according to the requirement
 	 */
 	private FavoriteRecipeResonseDTO convertEntityToDto(FavoriteRecipes favRecipes) {
 		log.info("Entering the convertEntityToDto of RecipeServiceImpl class!!");
@@ -164,6 +190,10 @@ public class RecipeServiceImpl implements RecipeService {
 		return recipeResonseDTO;
 	}
 	
+	/**
+	 * This method is used to get the ingredients for each recipe 
+	 * 
+	 */
 	private List<Ingredients> getIngredients(int recipeId){
 		return recipeRepository.findAll().stream().filter(r -> r.getRecipeId() == recipeId)
 				.flatMap(t -> t.getIngredients().stream()).distinct().collect(Collectors.toList());

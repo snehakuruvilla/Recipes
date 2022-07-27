@@ -30,7 +30,7 @@ import com.recipes.services.RecipeService;
  * 2. /recipes - to display all the recipes
  * 3. /addrecipe - to add recipe to the favorite recipe list
  * 4. /updaterecipes - to update a favorite recipe
- * 
+ * 5. .searching - to filter search
  */
 @RestController
 @RequestMapping("/api/recipes")
@@ -42,6 +42,8 @@ public class RecipeController {
 	
 	/**
 	 * This method is used to display all the favorite recipes for the user 
+	 * As per logged in userId, the Favorite recipes of the users will be returned  as a list 
+	 * 
 	 * @param userId
 	 * @return RecipeResonseDTO
 	 */
@@ -53,6 +55,7 @@ public class RecipeController {
 	
 	/**
 	 * This method is used to display all the recipes 
+	 * All the Recipes will be returned as a list to select
 	 *
 	 * @return List<recipes>
 	 */
@@ -63,6 +66,7 @@ public class RecipeController {
 	
 	/**
 	 * This method is used to add a new recipe to the favoriteRecipe 
+	 * The method helps user to add new recipe from the recipe list to the favorite list
 	 * 
 	 * @param favoriteRecipe object 
 	 * @throws Exception 
@@ -73,7 +77,9 @@ public class RecipeController {
 	}
 	
 	/**
-	 * This method is used to update a favorite recipe. 
+	 * This method is used to update a favorite recipe of the user.
+	 * The update on servings and rating is applicable.
+	 *  
 	 * @param recipeId
 	 * @param favoriteRecipe object 
 	 * @return FavoriteRecipe object
@@ -85,6 +91,7 @@ public class RecipeController {
 	
 	/**
 	 * This method is used to delete recipe from favoriteRecipe 
+	 * A favorite recipe can be removed for a user.
 	 * 
 	 * @param id
 	 * @return boolean
@@ -94,6 +101,19 @@ public class RecipeController {
 		return new ResponseEntity<>(recipeService.deleteRecipe(favId),HttpStatus.NOT_FOUND);
 	}
 	
+	
+	/**
+	 * This method is used to filter search the favoriteRecipe 
+	 * From the favorite recipe list, the user can filter the search using the number of fileds.
+	 * 
+	 * @param userId
+	 * @param servings
+	 * @param dishType
+	 * @param instructions
+	 * @param includeIngredients
+	 * @param excludeIngredients
+	 * @return FavoriteRecipeResonseDTO
+	 */
 	@GetMapping("/searching")
 	public ResponseEntity<List<FavoriteRecipeResonseDTO>> getSearching(@RequestParam(name="userId") int userId, @RequestParam(name="servings") int servings, 
 			@RequestParam(name="dishType") String dishType, @RequestParam(name="instructions") String instructions, 

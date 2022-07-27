@@ -14,11 +14,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
+/**
+ * @author SK
+ *
+ */
 @Entity
 @Table(name = "FAVORITE_RECIPES")
 @Data
 public class FavoriteRecipes {
 
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "fav_id")

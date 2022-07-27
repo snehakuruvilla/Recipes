@@ -6,6 +6,10 @@ import com.recipes.bean.Ingredients;
 
 import lombok.Data;
 
+/**
+ * @author SK
+ *
+ */
 @Data
 public class FavoriteRecipeResonseDTO {
 
