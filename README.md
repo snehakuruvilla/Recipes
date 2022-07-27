@@ -28,7 +28,6 @@ $ import the project Banking
 $ convert to maven
 $ run as maven build -- clean install
 $ run as spring boot app
-$ application will be available in: localHost:8080/api/recipes
 $ application swagger will be available in: localHost:8080/swagger-ui/
 
 ######Following are the Test UserID
@@ -54,3 +53,13 @@ PUT ​/api​/recipes​/updaterecipe​/{id} - Update the favorite recipe deta
 DELETE /api/recipes/deleterecipe/{id} - Delete a favorite recipe for a user.
 
 JUnit test are available. Code quality checked using Sonar.
+
+####REMARKS
+
+#####Expected Frontend: 
+
+########UserHome page:
+---> A userHome page where all the favorite Recipes will be listed as a table -- which invokes the api GET /api/recipes/favrecipes 
+---> along with update and delete button on each record -- which invokes the DELETE and PUT method
+---> Below there is an add button and search button which can invoke the apis GET /api/recipes/recipes and GET ​/api​/recipes​/searching
+---> On the list of recipes a new add to favorite button is there, on click calls the api POST /api/recipes/addrecipe which adds the record to FavoriteRecipes.
